@@ -1,0 +1,13 @@
+{
+  "name": "arku",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Arku: marketplace de servicios para el hogar en Cumbayá y Tumbaco. Sprint 01: jardines.",
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "tokens": "pnpm --filter @arku/ui tokens",
+    "mobile": "pnpm --filter @arku/mobile start"
+  }
+}
