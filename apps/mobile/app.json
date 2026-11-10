@@ -24,7 +24,21 @@
     "scheme": "arku",
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Arku usa tu ubicación para encontrar la dirección de tu jardín y confirmar que está en nuestra zona de servicio."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Arku usa tus fotos para que puedas mostrar tu jardín y recibir una cotización más precisa.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ]
   }
 }

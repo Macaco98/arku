@@ -1,5 +1,6 @@
 import { space } from '@arku/ui';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { EmptyState } from '../../components/EmptyState';
@@ -21,10 +22,18 @@ function subtitle(status: string, count: number, offline: boolean) {
 /** S02 · Mis jardines: lista, vacío, cargando, error y sin conexión. */
 export default function MisJardines() {
   const router = useRouter();
+  const { guardado } = useLocalSearchParams<{ guardado?: string }>();
   const { status, gardens, locationOf, retry } = useGardenList();
   const offline = useIsOffline();
   const soon = (pantalla: string) => router.push({ pathname: '/proximamente', params: { pantalla } });
   const sub = subtitle(status, gardens.length, offline);
+
+  // El aviso de "Jardín guardado" se oculta solo después de unos segundos.
+  useEffect(() => {
+    if (!guardado) return;
+    const t = setTimeout(() => router.setParams({ guardado: undefined }), 6000);
+    return () => clearTimeout(t);
+  }, [guardado, router]);
 
   const header = (
     <View style={styles.header}>
@@ -36,6 +45,9 @@ export default function MisJardines() {
           actionLabel="Reintentar"
           onAction={retry}
         />
+      ) : null}
+      {guardado ? (
+        <StatusBanner tipo="Éxito" title="Jardín guardado" message={`«${guardado}» ya está en tu lista. Pronto podrás cotizarlo desde aquí.`} />
       ) : null}
       <AppText variant="Heading/24" tone="primary" accessibilityRole="header">
         Mis jardines
@@ -92,13 +104,13 @@ export default function MisJardines() {
           title="Aún no tienes jardines"
           message="Registra tu primer jardín en pocos pasos. Las fotos son opcionales."
           actionLabel="Registrar jardín"
-          onAction={() => soon('Registrar jardín')}
+          onAction={() => router.push('/registro')}
         />
       }
       ListFooterComponent={
         gardens.length > 0 ? (
           <View style={styles.footer}>
-            <SecondaryButton label="Registrar nuevo jardín" disabled={offline} onPress={() => soon('Registrar jardín')} />
+            <SecondaryButton label="Registrar nuevo jardín" disabled={offline} onPress={() => router.push('/registro')} />
           </View>
         ) : undefined
       }

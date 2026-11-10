@@ -3,7 +3,8 @@ import { validateCedula } from './cedula';
 import { ADDRESS_LABELS, SIZE_BANDS } from './types';
 
 export const MAX_PHOTOS_PER_GARDEN = 6;
-export const MAX_ACCESS_NOTES = 500;
+export const MAX_ACCESS_NOTES = 300;
+export const MAX_ARRIVAL_INSTRUCTIONS = 300;
 
 const name = (field: string) =>
   z
@@ -44,6 +45,7 @@ export const addressInputSchema = z.object({
   label: z.enum(ADDRESS_LABELS as [string, ...string[]]),
   line: z.string().trim().min(5, 'Escribe la dirección.'),
   reference: z.string().trim().max(200).optional(),
+  arrivalInstructions: z.string().trim().max(MAX_ARRIVAL_INSTRUCTIONS).optional(),
   coordinates: coordinatesSchema,
 });
 export type AddressInput = z.input<typeof addressInputSchema>;
@@ -53,7 +55,7 @@ export const gardenInputSchema = z.object({
   name: z.string().trim().min(2, 'Ponle un nombre a tu jardín.').max(40),
   addressId: z.string().min(1),
   sizeBand: z.enum(SIZE_BANDS as [string, ...string[]]),
-  accessNotes: z.string().trim().max(MAX_ACCESS_NOTES).default(''),
+  accessNotes: z.string().trim().max(MAX_ACCESS_NOTES, `Máximo ${MAX_ACCESS_NOTES} caracteres.`).default(''),
 });
 export type GardenInput = z.input<typeof gardenInputSchema>;
 
