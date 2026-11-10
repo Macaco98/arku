@@ -44,6 +44,7 @@ export function snapshotGarden(garden: Garden, address: Address): GardenSnapshot
     sizeBand: garden.sizeBand,
     photoCount: garden.photos.length,
     accessNotes: garden.accessNotes,
+    arrivalInstructions: address.arrivalInstructions ?? '',
   };
 }
 

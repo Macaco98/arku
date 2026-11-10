@@ -32,6 +32,8 @@ export interface Address {
   label: AddressLabel;
   line: string;
   reference?: string;
+  /** Qué hacer al llegar: guardia, timbre, portón. Sirve para todos los jardines de esta dirección. */
+  arrivalInstructions?: string;
   coordinates: Coordinates;
   /** Zona de cobertura que validó la dirección. */
   coverageZoneId: string;
@@ -53,6 +55,7 @@ export interface Garden {
   addressId: string;
   sizeBand: SizeBand;
   photos: GardenPhoto[];
+  /** Notas propias de este jardín: mascotas, plantas delicadas, acceso al jardín. */
   accessNotes: string;
   createdAt: ISODate;
   updatedAt: ISODate;
@@ -95,6 +98,7 @@ export interface GardenSnapshot {
   sizeBand: SizeBand;
   photoCount: number;
   accessNotes: string;
+  arrivalInstructions: string;
 }
 
 export interface QuotePrice {

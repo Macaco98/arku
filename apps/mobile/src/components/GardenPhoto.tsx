@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 /**
@@ -6,7 +7,7 @@ import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from 'react-native-svg'
  */
 export function GardenPhoto({ size = 72 }: { size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 106 106" accessible={false}>
+    <Svg width={size} height={size} viewBox="0 0 106 106" {...decorative}>
       <Defs>
         <LinearGradient id="sky" x1="53" y1="0" x2="53" y2="106" gradientUnits="userSpaceOnUse">
           <Stop stopColor="#CFE6C4" />
@@ -20,3 +21,6 @@ export function GardenPhoto({ size = 72 }: { size?: number }) {
     </Svg>
   );
 }
+
+/** Oculta el dibujo a lectores de pantalla. En web, accessible={false} genera un atributo inválido. */
+const decorative = (Platform.OS === 'web' ? { 'aria-hidden': 'true' } : { accessible: false }) as object;

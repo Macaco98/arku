@@ -47,6 +47,7 @@ export function TextField({ label, error, success, helper, editable = true, ...i
           styles.input,
           text['Body/16'],
           { borderColor, borderWidth: focused || error || success ? 2 : 1, color: color['text/body'] },
+          input.multiline && styles.multiline,
           !editable && { backgroundColor: color['bg/subtle'] },
           // En web, el borde del estado reemplaza el contorno de foco del navegador.
           Platform.OS === 'web' && (webNoOutline as object),
@@ -71,4 +72,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     backgroundColor: color['bg/surface'],
   },
+  multiline: { minHeight: 104, paddingTop: space.md, paddingBottom: space.md, textAlignVertical: 'top' },
 });

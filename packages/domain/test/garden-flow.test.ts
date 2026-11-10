@@ -65,6 +65,48 @@ describe('flujo crear → guardar → reutilizar', () => {
   });
 });
 
+describe('registrar jardín (S03–S06)', () => {
+  it('crea dirección nueva con indicaciones al llegar, jardín y fotos en un solo paso', async () => {
+    const { service } = makeService(new MemoryStorage());
+    const garden = await service.registerGarden('c1', {
+      address: { label: 'Casa', line: 'Av. Interoceánica km 12', reference: 'Portón negro', arrivalInstructions: 'Avisar al guardia', coordinates: CUMBAYA },
+      garden: { name: 'Casa Cumbayá', sizeBand: 'L', accessNotes: 'Perro amigable' },
+      photoKeys: ['k1', 'k2'],
+    });
+    expect(garden.photos).toHaveLength(2);
+    const [address] = await service.listAddresses('c1');
+    expect(address).toMatchObject({ arrivalInstructions: 'Avisar al guardia', coverageZoneId: 'zone-cumbaya' });
+    const quote = await service.requestQuote('c1', garden.id);
+    expect(quote.status).toBe('automatic');
+    expect(quote.snapshot.arrivalInstructions).toBe('Avisar al guardia');
+  });
+
+  it('reutiliza una dirección guardada para un segundo jardín', async () => {
+    const { service } = makeService(new MemoryStorage());
+    const casa = await service.addAddress('c1', { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA });
+    await service.registerGarden('c1', { address: { addressId: casa.id }, garden: { name: 'Posterior', sizeBand: 'S' }, photoKeys: [] });
+    expect(await service.listAddresses('c1')).toHaveLength(1);
+    expect(await service.listGardens('c1')).toHaveLength(1);
+  });
+
+  it('no registra fuera de cobertura ni con la dirección de otro cliente', async () => {
+    const { service } = makeService(new MemoryStorage());
+    await expect(
+      service.registerGarden('c1', { address: { label: 'Otra', line: 'San Rafael', coordinates: { lat: -0.3, lng: -78.45 } }, garden: { name: 'Jardín X', sizeBand: 'S' }, photoKeys: [] }),
+    ).rejects.toBeInstanceOf(OutOfCoverageError);
+    const ajena = await service.addAddress('c2', { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA });
+    await expect(
+      service.registerGarden('c1', { address: { addressId: ajena.id }, garden: { name: 'Jardín X', sizeBand: 'S' }, photoKeys: [] }),
+    ).rejects.toThrow('no encontrado');
+  });
+
+  it('avisa la cobertura en vivo', async () => {
+    const { service } = makeService(new MemoryStorage());
+    expect(await service.checkCoverage(CUMBAYA)).toMatchObject({ covered: true, zone: { name: 'Cumbayá' } });
+    expect(await service.checkCoverage({ lat: -0.3, lng: -78.45 })).toEqual({ covered: false });
+  });
+});
+
 describe('lista de jardines', () => {
   it('muestra primero el jardín más reciente y recupera al cliente', async () => {
     const { service, advance } = makeService(new MemoryStorage());
@@ -107,7 +149,7 @@ describe('edición de jardines', () => {
 
     const history = await service.listQuotes('c1', garden.id);
     const frozen = history.find((q) => q.id === before.id)!;
-    expect(frozen.snapshot).toEqual({ gardenName: 'Casa Cumbayá', addressLine: 'Av. Interoceánica km 12', sizeBand: 'M', photoCount: 0, accessNotes: 'Timbre negro' });
+    expect(frozen.snapshot).toEqual({ gardenName: 'Casa Cumbayá', addressLine: 'Av. Interoceánica km 12', sizeBand: 'M', photoCount: 0, accessNotes: 'Timbre negro', arrivalInstructions: '' });
     expect(frozen.price?.baseCents).toBe(3500);
     expect(after.snapshot.sizeBand).toBe('S');
     expect(after.price?.baseCents).toBe(2500);

@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { color as tokens } from '@arku/ui';
 import Svg, { Path } from 'react-native-svg';
 
@@ -37,10 +38,13 @@ interface Props {
 
 export function Icon({ name, size = 24, color = tokens['text/primary'] }: Props) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" accessible={false}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...decorative}>
       {PATHS[name].map((d) => (
         <Path key={d} d={d} stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
       ))}
     </Svg>
   );
 }
+
+/** Oculta el dibujo a lectores de pantalla. En web, accessible={false} genera un atributo inválido. */
+const decorative = (Platform.OS === 'web' ? { 'aria-hidden': 'true' } : { accessible: false }) as object;
