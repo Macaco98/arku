@@ -8,6 +8,7 @@ import {
 import { color, text } from '@arku/ui';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ServicesProvider } from '../services';
 
 export default function RootLayout() {
@@ -20,21 +21,25 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ServicesProvider>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: color['bg/canvas'] },
-          headerTintColor: color['text/primary'],
-          headerTitleStyle: { fontFamily: text['Body/16 Strong'].fontFamily },
-          contentStyle: { backgroundColor: color['bg/canvas'] },
-          headerBackButtonDisplayMode: 'minimal',
-        }}
-      >
-        <Stack.Screen name="index" options={{ title: 'Tus datos' }} />
-        <Stack.Screen name="inicio" options={{ title: 'arku', headerBackVisible: false }} />
-      </Stack>
-    </ServicesProvider>
+    <SafeAreaProvider>
+      <ServicesProvider>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: color['bg/canvas'] },
+            headerTintColor: color['text/primary'],
+            headerTitleStyle: { fontFamily: text['Body/16 Strong'].fontFamily },
+            headerTitleAlign: 'center',
+            contentStyle: { backgroundColor: color['bg/canvas'] },
+            headerBackButtonDisplayMode: 'minimal',
+          }}
+        >
+          <Stack.Screen name="index" options={{ title: 'Tus datos' }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="proximamente" options={{ title: 'Próximamente', presentation: 'modal' }} />
+        </Stack>
+      </ServicesProvider>
+    </SafeAreaProvider>
   );
 }

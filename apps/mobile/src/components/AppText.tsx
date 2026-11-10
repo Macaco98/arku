@@ -3,7 +3,7 @@ import { Text, type TextProps } from 'react-native';
 
 interface Props extends TextProps {
   variant?: TextStyleName;
-  tone?: 'primary' | 'body' | 'secondary' | 'danger' | 'success' | 'on-brand';
+  tone?: 'primary' | 'body' | 'secondary' | 'brand' | 'danger' | 'success' | 'on-brand';
 }
 
 /** Texto con los estilos de Figma (Display/32 … Caption/12). */

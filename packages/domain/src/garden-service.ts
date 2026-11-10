@@ -48,6 +48,10 @@ export class GardenService {
     return this.deps.repos.customers.save(customer);
   }
 
+  getCustomer(customerId: string) {
+    return this.deps.repos.customers.get(customerId);
+  }
+
   /** S03: la dirección solo se guarda si cae en una zona de cobertura. */
   async addAddress(customerId: string, input: AddressInput): Promise<Address> {
     const data = addressInputSchema.parse(input);
@@ -89,8 +93,10 @@ export class GardenService {
     return this.deps.repos.gardens.save(garden);
   }
 
-  listGardens(customerId: string) {
-    return this.deps.repos.gardens.list((g) => g.customerId === customerId);
+  /** Jardines del cliente, del más reciente al más antiguo. */
+  async listGardens(customerId: string) {
+    const gardens = await this.deps.repos.gardens.list((g) => g.customerId === customerId);
+    return gardens.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   /** D02: editar cambia cotizaciones futuras, nunca las existentes. */

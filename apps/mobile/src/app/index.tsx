@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { customerProfileSchema, validateCedula, type CustomerProfileInput } from '@arku/domain';
 import { space } from '@arku/ui';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
@@ -16,7 +16,7 @@ const DEV_PHONE = '0990000000';
 /** A03 · Tus datos: nombre, apellido y cédula ecuatoriana validada en línea. */
 export default function TusDatos() {
   const router = useRouter();
-  const { gardens, setCustomer } = useServices();
+  const { gardens, signIn, customer, sessionStatus } = useServices();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>();
   const { control, handleSubmit, watch, formState } = useForm<CustomerProfileInput>({
@@ -32,7 +32,7 @@ export default function TusDatos() {
     setSaving(true);
     setSaveError(undefined);
     try {
-      setCustomer(await gardens.registerCustomer(DEV_PHONE, values));
+      await signIn(await gardens.registerCustomer(DEV_PHONE, values));
       router.replace('/inicio');
     } catch {
       setSaveError('No pudimos guardar tus datos. Intenta de nuevo.');
@@ -40,6 +40,9 @@ export default function TusDatos() {
       setSaving(false);
     }
   });
+
+  if (sessionStatus === 'loading') return null;
+  if (customer) return <Redirect href="/inicio" />;
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
