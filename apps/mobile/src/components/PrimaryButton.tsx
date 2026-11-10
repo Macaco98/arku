@@ -7,12 +7,17 @@ interface Props {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
+  /** "acento" = naranja, para la acción principal sobre fondos verdes (A00, tarjeta de Inicio). */
+  tone?: 'primario' | 'acento';
 }
 
 /** Componente PrimaryButton de Figma: Default · Pressed · Disabled · Loading · Focus. */
-export function PrimaryButton({ label, onPress, disabled = false, loading = false }: Props) {
+export function PrimaryButton({ label, onPress, disabled = false, loading = false, tone = 'primario' }: Props) {
   const inactive = disabled || loading;
   const [focused, setFocused] = useState(false);
+  const accent = tone === 'acento';
+  const labelColor = disabled ? color['text/muted'] : accent ? color['text/primary'] : color['text/on-brand'];
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -23,14 +28,23 @@ export function PrimaryButton({ label, onPress, disabled = false, loading = fals
       onBlur={() => setFocused(false)}
       style={({ pressed }) => [
         styles.base,
-        { backgroundColor: disabled ? color['action/disabled'] : pressed ? color['action/primary-pressed'] : color['action/primary'] },
+        {
+          backgroundColor: disabled
+            ? color['action/disabled']
+            : accent
+              ? color['bg/accent']
+              : pressed
+                ? color['action/primary-pressed']
+                : color['action/primary'],
+          opacity: accent && pressed ? 0.85 : 1,
+        },
         focused && styles.focus,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={color['text/on-brand']} accessibilityLabel="Cargando" />
+        <ActivityIndicator color={labelColor} accessibilityLabel="Cargando" />
       ) : (
-        <Text style={[text['Body/16 Strong'], { color: disabled ? color['text/muted'] : color['text/on-brand'] }]}>{label}</Text>
+        <Text style={[text['Body/16 Strong'], { color: labelColor }]}>{label}</Text>
       )}
     </Pressable>
   );

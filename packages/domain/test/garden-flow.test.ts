@@ -65,6 +65,19 @@ describe('flujo crear → guardar → reutilizar', () => {
   });
 });
 
+describe('lista de jardines', () => {
+  it('muestra primero el jardín más reciente y recupera al cliente', async () => {
+    const { service, advance } = makeService(new MemoryStorage());
+    const customer = await service.registerCustomer('0991234567', { firstName: 'Ana', lastName: 'Pérez', idNumber: '1712345675' });
+    const casa = await service.addAddress(customer.id, { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA });
+    await service.createGarden(customer.id, { name: 'Primero', addressId: casa.id, sizeBand: 'S' });
+    advance(1000);
+    await service.createGarden(customer.id, { name: 'Segundo', addressId: casa.id, sizeBand: 'M' });
+    expect((await service.listGardens(customer.id)).map((g) => g.name)).toEqual(['Segundo', 'Primero']);
+    expect(await service.getCustomer(customer.id)).toMatchObject({ firstName: 'Ana' });
+  });
+});
+
 describe('edición de jardines', () => {
   it('guarda sin fotos en cualquier tamaño, y L pasa a automática al agregar una foto', async () => {
     const { service } = makeService(new MemoryStorage());

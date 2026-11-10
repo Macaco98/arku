@@ -6,7 +6,7 @@ import {
   GardenService,
   type Customer,
 } from '@arku/domain';
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 /**
  * MOCK DE DESARROLLO. Los datos viven en AsyncStorage del dispositivo,
@@ -24,10 +24,16 @@ function createDevServices() {
   });
 }
 
+/** Sesión de desarrollo: recuerda qué cliente está usando la app en este dispositivo. */
+const SESSION_KEY = 'arku.dev.v1.session';
+
 interface ServicesValue {
   gardens: GardenService;
+  /** 'loading' mientras se lee la sesión guardada. */
+  sessionStatus: 'loading' | 'ready';
   customer: Customer | null;
-  setCustomer: (c: Customer | null) => void;
+  signIn: (c: Customer) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const ServicesContext = createContext<ServicesValue | null>(null);
@@ -35,7 +41,33 @@ const ServicesContext = createContext<ServicesValue | null>(null);
 export function ServicesProvider({ children }: { children: ReactNode }) {
   const gardens = useMemo(createDevServices, []);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const value = useMemo(() => ({ gardens, customer, setCustomer }), [gardens, customer]);
+  const [sessionStatus, setSessionStatus] = useState<'loading' | 'ready'>('loading');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const id = await AsyncStorage.getItem(SESSION_KEY);
+        if (id) setCustomer((await gardens.getCustomer(id)) ?? null);
+      } finally {
+        setSessionStatus('ready');
+      }
+    })();
+  }, [gardens]);
+
+  const signIn = useCallback(async (c: Customer) => {
+    await AsyncStorage.setItem(SESSION_KEY, c.id);
+    setCustomer(c);
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await AsyncStorage.setItem(SESSION_KEY, '');
+    setCustomer(null);
+  }, []);
+
+  const value = useMemo(
+    () => ({ gardens, sessionStatus, customer, signIn, signOut }),
+    [gardens, sessionStatus, customer, signIn, signOut],
+  );
   return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;
 }
 
@@ -43,4 +75,15 @@ export function useServices() {
   const value = useContext(ServicesContext);
   if (!value) throw new Error('useServices debe usarse dentro de ServicesProvider');
   return value;
+}
+
+/** Cliente con sesión iniciada. Solo para pantallas detrás del registro. */
+export function useCustomer(): Customer {
+  const { customer } = useServices();
+  if (!customer) throw new Error('No hay un cliente con sesión iniciada');
+  return customer;
+}
+
+export function initialsOf(c: Pick<Customer, 'firstName' | 'lastName'>) {
+  return `${c.firstName.charAt(0)}${c.lastName.charAt(0)}`.toUpperCase();
 }
