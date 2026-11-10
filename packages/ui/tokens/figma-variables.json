@@ -1,0 +1,248 @@
+{
+  "$source": "Figma 35iOkyKYN5U4DEWfAqRDUy (ARKU — Sprint 01 · Jardines), exportado 2026-11-09",
+  "$note": "No editar a mano: actualizar desde las variables de Figma.",
+  "vars": {
+    "Primitivos": {
+      "forest/900": "#10342D",
+      "forest/700": "#1F5A4F",
+      "forest/500": "#3F7A6D",
+      "sage/300": "#A7D7A8",
+      "sage/100": "#E4F2E4",
+      "ivory/50": "#FAF8F2",
+      "ivory/100": "#F2EEE3",
+      "sand/200": "#E4DED0",
+      "orange/500": "#F6A623",
+      "orange/100": "#FDEFD3",
+      "neutral/900": "#1B2320",
+      "neutral/600": "#56625D",
+      "neutral/400": "#8E9893",
+      "white": "#FFFFFF",
+      "red/600": "#B42318",
+      "red/50": "#FCEBE9",
+      "forest/50": "#EEF5F2",
+      "forest/100": "#D6E8E1",
+      "forest/200": "#AECFC3",
+      "forest/300": "#7FB0A1",
+      "forest/400": "#52907F",
+      "forest/600": "#2C6A5C",
+      "forest/800": "#174538",
+      "forest/950": "#0F2D28",
+      "sage/50": "#F2F9F2",
+      "sage/200": "#C9E7CA",
+      "sage/400": "#84C286",
+      "sage/500": "#62A866",
+      "sage/600": "#4A8A4E",
+      "orange/50": "#FEF8EC",
+      "orange/200": "#FBDCA3",
+      "orange/300": "#F9C66C",
+      "orange/400": "#F7B444",
+      "orange/600": "#D98A0B",
+      "orange/700": "#B06D08",
+      "sand/300": "#CFC7B4",
+      "sand/400": "#B0A792",
+      "neutral/200": "#D5DAD7",
+      "neutral/300": "#B7BEBA",
+      "neutral/500": "#737D79",
+      "neutral/700": "#3A4541",
+      "red/100": "#F8D4CF",
+      "red/700": "#8F1C13"
+    },
+    "Color": {
+      "bg/canvas": {
+        "alias": "ivory/50"
+      },
+      "bg/surface": {
+        "alias": "white"
+      },
+      "bg/subtle": {
+        "alias": "ivory/100"
+      },
+      "bg/brand": {
+        "alias": "forest/900"
+      },
+      "bg/brand-soft": {
+        "alias": "sage/100"
+      },
+      "bg/accent": {
+        "alias": "orange/500"
+      },
+      "bg/accent-soft": {
+        "alias": "orange/100"
+      },
+      "bg/danger-soft": {
+        "alias": "red/50"
+      },
+      "bg/sage": {
+        "alias": "sage/300"
+      },
+      "action/primary": {
+        "alias": "forest/700"
+      },
+      "action/primary-pressed": {
+        "alias": "forest/900"
+      },
+      "action/disabled": {
+        "alias": "sand/200"
+      },
+      "text/primary": {
+        "alias": "forest/900"
+      },
+      "text/body": {
+        "alias": "neutral/900"
+      },
+      "text/secondary": {
+        "alias": "neutral/600"
+      },
+      "text/muted": {
+        "alias": "neutral/400"
+      },
+      "text/on-brand": {
+        "alias": "white"
+      },
+      "text/brand": {
+        "alias": "forest/700"
+      },
+      "text/danger": {
+        "alias": "red/600"
+      },
+      "text/accent-strong": {
+        "alias": "forest/900"
+      },
+      "border/default": {
+        "alias": "sand/200"
+      },
+      "border/strong": {
+        "alias": "neutral/400"
+      },
+      "border/focus": {
+        "alias": "forest/700"
+      },
+      "border/danger": {
+        "alias": "red/600"
+      },
+      "border/accent": {
+        "alias": "orange/500"
+      },
+      "bg/brand-deep": {
+        "alias": "forest/950"
+      },
+      "bg/success-soft": {
+        "alias": "sage/100"
+      },
+      "text/success": {
+        "alias": "sage/600"
+      },
+      "border/success": {
+        "alias": "sage/500"
+      },
+      "text/accent": {
+        "alias": "orange/700"
+      }
+    },
+    "Espaciado": {
+      "space/xs": 4,
+      "space/sm": 8,
+      "space/md": 12,
+      "space/lg": 16,
+      "space/xl": 24,
+      "space/2xl": 32,
+      "space/3xl": 48,
+      "size/touch-min": 44
+    },
+    "Radio": {
+      "radius/sm": 8,
+      "radius/md": 12,
+      "radius/lg": 16,
+      "radius/xl": 24,
+      "radius/full": 999
+    },
+    "Tipografía": {
+      "font/family": "Plus Jakarta Sans",
+      "font/size/12": 12,
+      "font/size/14": 14,
+      "font/size/16": 16,
+      "font/size/20": 20,
+      "font/size/24": 24,
+      "font/size/32": 32,
+      "font/line-height/12": 16,
+      "font/line-height/14": 20,
+      "font/line-height/16": 24,
+      "font/line-height/20": 28,
+      "font/line-height/24": 32,
+      "font/line-height/32": 40
+    }
+  },
+  "styles": [
+    {
+      "name": "Display/32",
+      "size": 32,
+      "weight": "Bold",
+      "lh": 40
+    },
+    {
+      "name": "Heading/24",
+      "size": 24,
+      "weight": "Bold",
+      "lh": 32
+    },
+    {
+      "name": "Title/20",
+      "size": 20,
+      "weight": "SemiBold",
+      "lh": 28
+    },
+    {
+      "name": "Body/16",
+      "size": 16,
+      "weight": "Regular",
+      "lh": 24
+    },
+    {
+      "name": "Body/16 Strong",
+      "size": 16,
+      "weight": "SemiBold",
+      "lh": 24
+    },
+    {
+      "name": "Body/14",
+      "size": 14,
+      "weight": "Regular",
+      "lh": 20
+    },
+    {
+      "name": "Label/14",
+      "size": 14,
+      "weight": "SemiBold",
+      "lh": 20
+    },
+    {
+      "name": "Caption/12",
+      "size": 12,
+      "weight": "Medium",
+      "lh": 16
+    }
+  ],
+  "effects": [
+    {
+      "name": "Elevación/1",
+      "y": 1,
+      "radius": 3,
+      "color": "#10342D",
+      "opacity": 0.08
+    },
+    {
+      "name": "Elevación/2",
+      "y": 4,
+      "radius": 14,
+      "color": "#10342D",
+      "opacity": 0.1
+    },
+    {
+      "name": "Elevación/3",
+      "y": 12,
+      "radius": 32,
+      "color": "#10342D",
+      "opacity": 0.18
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@arku/domain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reglas de negocio de Arku: tipos, validaciones, cotización, cobertura y repositorios.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12"
+  }
+}
