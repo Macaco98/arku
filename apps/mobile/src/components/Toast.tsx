@@ -8,12 +8,14 @@ interface Props {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
+  /** Distancia desde abajo, para quedar sobre el pie de la pantalla. */
+  bottom?: number;
 }
 
 /** Aviso breve sobre el pie (Figma › S05 · Foto eliminada). */
-export function Toast({ icon, message, actionLabel, onAction }: Props) {
+export function Toast({ icon, message, actionLabel, onAction, bottom = 110 }: Props) {
   return (
-    <View style={styles.wrap} pointerEvents="box-none">
+    <View style={[styles.wrap, { bottom }]} pointerEvents="box-none">
       <View style={styles.toast} accessibilityRole="alert" accessibilityLiveRegion="polite">
         <View style={styles.icon}>
           <Icon name={icon} size={16} color={color['text/primary']} />
@@ -34,7 +36,7 @@ export function Toast({ icon, message, actionLabel, onAction }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { position: 'absolute', left: space.lg, right: space.lg, bottom: 110 },
+  wrap: { position: 'absolute', left: space.lg, right: space.lg },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',

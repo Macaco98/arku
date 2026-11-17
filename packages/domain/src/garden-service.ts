@@ -23,6 +23,12 @@ export interface RegisterGardenInput {
   photoKeys: string[];
 }
 
+/** D02 · Editar jardín: datos, fotos nuevas y fotos quitadas, en un solo guardado. */
+export interface GardenEdits extends GardenUpdate {
+  addPhotoKeys?: string[];
+  removePhotoIds?: string[];
+}
+
 export class OutOfCoverageError extends Error {
   constructor() {
     super('Por ahora atendemos solo en Cumbayá y Tumbaco.');
@@ -123,6 +129,12 @@ export class GardenService {
     return garden;
   }
 
+  /** D01: un jardín del cliente con su dirección. */
+  async getGarden(customerId: string, gardenId: string): Promise<{ garden: Garden; address: Address }> {
+    const garden = await this.requireGarden(customerId, gardenId);
+    return { garden, address: await this.requireAddress(customerId, garden.addressId) };
+  }
+
   /** Jardines del cliente, del más reciente al más antiguo. */
   async listGardens(customerId: string) {
     const gardens = await this.deps.repos.gardens.list((g) => g.customerId === customerId);
@@ -143,6 +155,20 @@ export class GardenService {
       updatedAt: this.deps.now().toISOString(),
     };
     return this.deps.repos.gardens.save(updated);
+  }
+
+  /** D02/D04: guarda todos los cambios. Las cotizaciones existentes no cambian (copia congelada). */
+  async editGarden(customerId: string, gardenId: string, edits: GardenEdits): Promise<Garden> {
+    const { addPhotoKeys = [], removePhotoIds = [], ...changes } = edits;
+    const garden = await this.requireGarden(customerId, gardenId);
+    const kept = garden.photos.filter((p) => !removePhotoIds.includes(p.id)).length;
+    if (kept + addPhotoKeys.length > MAX_PHOTOS_PER_GARDEN) {
+      throw new Error(`Puedes subir hasta ${MAX_PHOTOS_PER_GARDEN} fotos por jardín.`);
+    }
+    let updated = await this.updateGarden(customerId, gardenId, changes);
+    for (const id of removePhotoIds) updated = await this.removePhoto(customerId, gardenId, id);
+    for (const key of addPhotoKeys) updated = await this.addPhoto(customerId, gardenId, key);
+    return updated;
   }
 
   /** S05: la subida real a almacenamiento privado ocurre antes; aquí solo se registra la clave. */

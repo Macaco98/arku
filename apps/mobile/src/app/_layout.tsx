@@ -39,6 +39,10 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="registro" options={{ headerShown: false }} />
           <Stack.Screen name="cotizacion/[id]" options={{ title: 'Cotización' }} />
+          <Stack.Screen name="jardin/[id]/index" options={{ title: 'Jardín' }} />
+          <Stack.Screen name="jardin/[id]/editar" options={{ title: 'Editar jardín' }} />
+          <Stack.Screen name="cotizar/index" options={{ title: 'Cotizar jardinería' }} />
+          <Stack.Screen name="cotizar/[id]" options={{ title: 'Jardín' }} />
           <Stack.Screen name="proximamente" options={{ title: 'Próximamente', presentation: 'modal' }} />
         </Stack>
       </ServicesProvider>

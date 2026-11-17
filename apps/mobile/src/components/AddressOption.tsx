@@ -14,13 +14,14 @@ interface Props {
 
 /** Dirección guardada en S03 · Elegir dirección guardada. */
 export function AddressOption({ label, line, gardenCount, selected, onPress }: Props) {
-  const count = `${gardenCount} ${gardenCount === 1 ? 'jardín registrado' : 'jardines registrados'} aquí`;
+  /** gardenCount negativo oculta la línea del conteo. */
+  const count = gardenCount < 0 ? '' : `${gardenCount} ${gardenCount === 1 ? 'jardín registrado' : 'jardines registrados'} aquí`;
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected, checked: selected }}
-      accessibilityLabel={`${label}. ${line}. ${count}.`}
+      accessibilityLabel={[label, line, count].filter(Boolean).join('. ')}
       style={({ pressed }) => [
         styles.card,
         selected
@@ -39,9 +40,11 @@ export function AddressOption({ label, line, gardenCount, selected, onPress }: P
         <AppText variant="Body/14" tone="secondary" numberOfLines={2}>
           {line}
         </AppText>
-        <AppText variant="Caption/12" tone="brand">
-          {count}
-        </AppText>
+        {count ? (
+          <AppText variant="Caption/12" tone="brand">
+            {count}
+          </AppText>
+        ) : null}
       </View>
       <RadioMark selected={selected} />
     </Pressable>
