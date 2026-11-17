@@ -13,7 +13,15 @@ import {
   type GardenInput,
   type GardenUpdate,
 } from './schemas';
-import type { Address, AddressLabel, Customer, Garden, PricingRule, Quote, SizeBand } from './types';
+import type { Address, AddressLabel, Coordinates, Customer, Garden, PricingRule, Quote, SizeBand } from './types';
+
+export interface RegisterGardenInput {
+  /** Dirección guardada o una nueva. */
+  address: { addressId: string } | AddressInput;
+  garden: Omit<GardenInput, 'addressId'>;
+  /** Claves de almacenamiento privado de las fotos ya subidas. */
+  photoKeys: string[];
+}
 
 export class OutOfCoverageError extends Error {
   constructor() {
@@ -52,6 +60,11 @@ export class GardenService {
     return this.deps.repos.customers.get(customerId);
   }
 
+  /** S03: aviso en vivo de cobertura mientras el cliente escribe o usa su ubicación. */
+  checkCoverage(point: Coordinates) {
+    return this.deps.coverage.check(point);
+  }
+
   /** S03: la dirección solo se guarda si cae en una zona de cobertura. */
   async addAddress(customerId: string, input: AddressInput): Promise<Address> {
     const data = addressInputSchema.parse(input);
@@ -63,6 +76,7 @@ export class GardenService {
       label: data.label as AddressLabel,
       line: data.line,
       ...(data.reference ? { reference: data.reference } : {}),
+      ...(data.arrivalInstructions ? { arrivalInstructions: data.arrivalInstructions } : {}),
       coordinates: data.coordinates,
       coverageZoneId: coverage.zone.id,
       createdAt: this.deps.now().toISOString(),
@@ -91,6 +105,22 @@ export class GardenService {
       updatedAt: now,
     };
     return this.deps.repos.gardens.save(garden);
+  }
+
+  /** S06 · Guardar jardín: usa una dirección guardada o crea una nueva, y adjunta las fotos. */
+  async registerGarden(customerId: string, input: RegisterGardenInput): Promise<Garden> {
+    if (input.photoKeys.length > MAX_PHOTOS_PER_GARDEN) {
+      throw new Error(`Puedes subir hasta ${MAX_PHOTOS_PER_GARDEN} fotos por jardín.`);
+    }
+    // Valida el jardín antes de crear la dirección, para no dejar direcciones huérfanas.
+    gardenInputSchema.parse({ ...input.garden, addressId: 'pendiente' });
+    const addressId =
+      'addressId' in input.address
+        ? (await this.requireAddress(customerId, input.address.addressId)).id
+        : (await this.addAddress(customerId, input.address)).id;
+    let garden = await this.createGarden(customerId, { ...input.garden, addressId });
+    for (const key of input.photoKeys) garden = await this.addPhoto(customerId, garden.id, key);
+    return garden;
   }
 
   /** Jardines del cliente, del más reciente al más antiguo. */

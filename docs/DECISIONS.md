@@ -24,6 +24,13 @@ Registro de decisiones tomadas por Bernardo. Complementa al documento maestro; s
 - La revisión manual termina con un precio que el cliente debe aceptar; las cotizaciones vencen (72 h provisional).
 - La cobertura se valida por zonas (polígonos), no por texto.
 
+## Registro de jardín (Bernardo, 2026-11-10)
+
+- S03 no usa mapa: botón "Usar mi ubicación" (GPS) más dirección escrita, referencia e indicaciones al llegar.
+- La dirección escrita se ubica con la geocodificación gratuita del teléfono (iOS/Android). En la vista previa web hay un botón de ubicación de ejemplo, solo para desarrollo.
+- Las indicaciones al llegar viven en la dirección y las comparten sus jardines. Las notas del jardín (`accessNotes`) quedan para lo propio de cada jardín.
+- Un PR por bloque de pantallas.
+
 ## Pendientes (no decididos)
 
 - Comisión de Arku, tarifas reales y umbrales de tamaño.
@@ -31,4 +38,3 @@ Registro de decisiones tomadas por Bernardo. Complementa al documento maestro; s
 - Polígonos oficiales de cobertura.
 - Límite de volumen de residuos.
 - Backend (Supabase candidato) y proveedor de SMS.
-- Logo final.

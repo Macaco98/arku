@@ -70,7 +70,7 @@ export default function Inicio() {
           <PrimaryButton
             tone="acento"
             label="Cotizar mi jardín"
-            onPress={() => soon(hasGardens ? 'Elegir jardín' : 'Registrar jardín')}
+            onPress={() => (hasGardens ? soon('Elegir jardín') : router.push('/registro'))}
           />
         </View>
       </View>
@@ -107,7 +107,7 @@ export default function Inicio() {
           title="Aún no tienes jardines"
           message="Regístralo una vez y úsalo cada vez que pidas el servicio."
           actionLabel="Registrar jardín"
-          onAction={() => soon('Registrar jardín')}
+          onAction={() => router.push('/registro')}
         />
       ) : null}
       {status === 'ready' && hasGardens ? (
