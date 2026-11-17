@@ -23,7 +23,6 @@ export default function Inicio() {
   const router = useRouter();
   const customer = useCustomer();
   const { status, gardens, addresses, locationOf, retry } = useGardenList();
-  const soon = (pantalla: string) => router.push({ pathname: '/proximamente', params: { pantalla } });
 
   const latest = gardens[0];
   const currentAddress = latest ? addresses.find((a) => a.id === latest.addressId) : addresses[0];
@@ -36,7 +35,7 @@ export default function Inicio() {
       </AppText>
 
       <Pressable
-        onPress={() => soon('Elegir dirección')}
+        onPress={() => router.push(addresses.length ? '/perfil/direcciones' : '/perfil/direccion')}
         accessibilityRole="button"
         accessibilityLabel={currentAddress ? `Dirección actual: ${describeAddress(currentAddress)}` : 'Agrega la dirección de tu jardín'}
         style={({ pressed }) => [styles.address, pressed && { backgroundColor: color['bg/subtle'] }]}

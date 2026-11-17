@@ -2,7 +2,7 @@ import { SIZE_BAND_LABELS, type Garden } from '@arku/domain';
 import { color, elevation, radius, space, touchMin } from '@arku/ui';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { photoUri } from '../services/photos';
+import { usePhotoUri } from '../services/photos';
 import { AppText } from './AppText';
 import { Chip } from './Chip';
 import { GardenPhoto } from './GardenPhoto';
@@ -28,8 +28,8 @@ export function photoCountLabel(count: number) {
 /** Componente GardenCard de Figma: Con foto Sí · No. */
 export function GardenCard({ garden, location, onPress, onEdit }: Props) {
   const hasPhotos = garden.photos.length > 0;
-  // Foto privada guardada en este dispositivo; si no está (p. ej. datos de ejemplo), se usa la ilustración.
-  const cover = hasPhotos ? photoUri(garden.photos[0]!.storageKey) : undefined;
+  // Foto privada (copia del teléfono o enlace temporal firmado); sin foto disponible se usa la ilustración.
+  const cover = usePhotoUri(garden.photos[0]?.storageKey);
   // Editar va junto a la tarjeta y no dentro: en web un botón no puede contener otro.
   return (
     <View>

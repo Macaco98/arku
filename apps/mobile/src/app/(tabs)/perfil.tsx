@@ -94,7 +94,7 @@ export default function Perfil() {
           <Row icon="user" title="Datos personales" subtitle="Nombre, apellido y cédula" onPress={() => router.push('/perfil/datos')} />
           <Row icon="pin" title="Mis direcciones" subtitle={plural(addresses.length, 'dirección guardada', 'direcciones guardadas')} onPress={() => router.push('/perfil/direcciones')} />
           <Row icon="leaf" title="Mis jardines" subtitle={plural(gardens.length, 'jardín', 'jardines')} onPress={() => router.navigate('/jardines')} />
-          <Row icon="info" title="Ayuda y soporte" onPress={() => soon('Ayuda y soporte')} />
+          <Row icon="info" title="Ayuda y soporte" onPress={() => router.push('/perfil/ayuda')} />
           <Row icon="shield" title="Términos y privacidad" onPress={() => soon('Términos y privacidad')} last />
         </View>
 
