@@ -1,106 +1,55 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { customerProfileSchema, validateCedula, type CustomerProfileInput } from '@arku/domain';
-import { space } from '@arku/ui';
+import { color, space } from '@arku/ui';
 import { Redirect, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '../components/AppText';
+import { Logo } from '../components/Logo';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { TextField } from '../components/TextField';
+import { SecondaryButton } from '../components/SecondaryButton';
 import { useServices } from '../services';
 
-/** Celular de desarrollo hasta conectar A01/A02 con un proveedor de SMS real. */
-const DEV_PHONE = '0990000000';
-
-/** A03 · Tus datos: nombre, apellido y cédula ecuatoriana validada en línea. */
-export default function TusDatos() {
+/** A00 · Bienvenida. Con sesión, pasa directo a Inicio o a completar los datos (A03). */
+export default function Bienvenida() {
   const router = useRouter();
-  const { gardens, signIn, customer, sessionStatus } = useServices();
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string>();
-  const { control, handleSubmit, watch, formState } = useForm<CustomerProfileInput>({
-    resolver: zodResolver(customerProfileSchema),
-    defaultValues: { firstName: '', lastName: '', idNumber: '' },
-    mode: 'onTouched',
-  });
+  const insets = useSafeAreaInsets();
+  const { customer, session, sessionStatus } = useServices();
 
-  const cedula = validateCedula(watch('idNumber') ?? '');
-  const canSubmit = cedula.status === 'valid' && watch('firstName').trim().length > 1 && watch('lastName').trim().length > 1;
-
-  const onSubmit = handleSubmit(async (values) => {
-    setSaving(true);
-    setSaveError(undefined);
-    try {
-      await signIn(await gardens.registerCustomer(DEV_PHONE, values));
-      router.replace('/inicio');
-    } catch {
-      setSaveError('No pudimos guardar tus datos. Intenta de nuevo.');
-    } finally {
-      setSaving(false);
-    }
-  });
-
-  if (sessionStatus === 'loading') return null;
+  if (sessionStatus === 'loading') return <View style={styles.screen} />;
   if (customer) return <Redirect href="/inicio" />;
+  if (session) return <Redirect href="/tus-datos" />;
+
+  // Crear cuenta e ingresar usan el mismo paso: el código por SMS decide si la cuenta ya existe.
+  const start = () => router.push('/ingresar');
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.intro}>
-          <AppText variant="Heading/24" tone="primary" accessibilityRole="header">
-            Cuéntanos quién eres
-          </AppText>
-          <AppText tone="secondary">Usamos tu cédula para verificar tu identidad. No la compartimos con los profesionales.</AppText>
-        </View>
-
-        <Controller
-          control={control}
-          name="firstName"
-          render={({ field, fieldState }) => (
-            <TextField label="Nombre" placeholder="Ana" autoComplete="given-name" value={field.value} onChangeText={field.onChange} onBlur={field.onBlur} error={fieldState.error?.message} />
-          )}
-        />
-        <Controller
-          control={control}
-          name="lastName"
-          render={({ field, fieldState }) => (
-            <TextField label="Apellido" placeholder="Pérez" autoComplete="family-name" value={field.value} onChangeText={field.onChange} onBlur={field.onBlur} error={fieldState.error?.message} />
-          )}
-        />
-        <Controller
-          control={control}
-          name="idNumber"
-          render={({ field }) => {
-            const showError = cedula.status === 'invalid' || (cedula.status === 'incomplete' && formState.touchedFields.idNumber);
-            return (
-              <TextField
-                label="Número de cédula"
-                placeholder="10 dígitos"
-                keyboardType="number-pad"
-                maxLength={10}
-                value={field.value}
-                onChangeText={(v) => field.onChange(v.replace(/\D/g, ''))}
-                onBlur={field.onBlur}
-                error={showError ? cedula.message : undefined}
-                success={cedula.status === 'valid' ? cedula.message : undefined}
-                helper={cedula.status === 'incomplete' ? cedula.message : 'Cédula de ciudadanía ecuatoriana'}
-              />
-            );
-          }}
-        />
-        {saveError ? <AppText tone="danger">{saveError}</AppText> : null}
-      </ScrollView>
-      <View style={styles.footer}>
-        <PrimaryButton label="Continuar" onPress={onSubmit} disabled={!canSubmit} loading={saving} />
+    <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, space.xl) }]}>
+      <StatusBar style="light" />
+      <View style={styles.brand}>
+        <Logo version="Blanco" height={72} />
+        <AppText variant="Body/16" tone="on-brand">
+          Tu mundo, resuelto.
+        </AppText>
       </View>
-    </KeyboardAvoidingView>
+      <View style={styles.bottom}>
+        <View style={styles.copy}>
+          <AppText variant="Heading/24" tone="on-brand" accessibilityRole="header">
+            Cuidamos tu jardín en Cumbayá y Tumbaco
+          </AppText>
+          <AppText variant="Body/16" tone="on-brand">
+            Cotiza en minutos y recibe un precio garantizado para el alcance acordado.
+          </AppText>
+        </View>
+        <PrimaryButton label="Crear cuenta" tone="acento" onPress={start} />
+        <SecondaryButton label="Ya tengo cuenta" sobreMarca onPress={start} />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  content: { padding: space.xl, gap: space.xl },
-  intro: { gap: space.sm },
-  footer: { padding: space.xl, paddingTop: space.md },
+  screen: { flex: 1, backgroundColor: color['bg/brand-deep'], paddingHorizontal: space.xl },
+  brand: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md },
+  bottom: { gap: space.md },
+  copy: { gap: space.sm, marginBottom: space.md },
 });

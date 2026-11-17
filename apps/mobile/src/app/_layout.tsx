@@ -35,7 +35,10 @@ export default function RootLayout() {
             headerBackButtonDisplayMode: 'minimal',
           }}
         >
-          <Stack.Screen name="index" options={{ title: 'Tus datos' }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="ingresar" options={{ title: '' }} />
+          <Stack.Screen name="codigo" options={{ title: '' }} />
+          <Stack.Screen name="tus-datos" options={{ title: 'Tus datos', headerBackVisible: false, gestureEnabled: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="registro" options={{ headerShown: false }} />
           <Stack.Screen name="cotizacion/[id]" options={{ title: 'Cotización' }} />

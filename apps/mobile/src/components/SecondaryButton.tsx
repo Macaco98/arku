@@ -7,10 +7,12 @@ interface Props {
   onPress: () => void;
   disabled?: boolean;
   tipo?: 'Contorno' | 'Texto';
+  /** Sobre fondos verde oscuro (A00): borde y texto blancos. */
+  sobreMarca?: boolean;
 }
 
 /** Componente SecondaryButton de Figma: Tipo Contorno · Texto; Default · Pressed · Disabled · Focus. */
-export function SecondaryButton({ label, onPress, disabled = false, tipo = 'Contorno' }: Props) {
+export function SecondaryButton({ label, onPress, disabled = false, tipo = 'Contorno', sobreMarca = false }: Props) {
   const [focused, setFocused] = useState(false);
   const outline = tipo === 'Contorno';
   return (
@@ -23,12 +25,12 @@ export function SecondaryButton({ label, onPress, disabled = false, tipo = 'Cont
       onBlur={() => setFocused(false)}
       style={({ pressed }) => [
         styles.base,
-        outline && { borderWidth: 1.5, borderColor: disabled ? color['border/default'] : color['action/primary'] },
-        pressed && { backgroundColor: color['bg/brand-soft'] },
+        outline && { borderWidth: 1.5, borderColor: disabled ? color['border/default'] : sobreMarca ? color['text/on-brand'] : color['action/primary'] },
+        pressed && { backgroundColor: sobreMarca ? color['bg/brand'] : color['bg/brand-soft'] },
         focused && styles.focus,
       ]}
     >
-      <Text style={[text['Body/16 Strong'], { color: disabled ? color['text/muted'] : color['text/brand'] }]}>{label}</Text>
+      <Text style={[text['Body/16 Strong'], { color: disabled ? color['text/muted'] : sobreMarca ? color['text/on-brand'] : color['text/brand'] }]}>{label}</Text>
     </Pressable>
   );
 }

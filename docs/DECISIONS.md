@@ -31,10 +31,17 @@ Registro de decisiones tomadas por Bernardo. Complementa al documento maestro; s
 - Las indicaciones al llegar viven en la dirección y las comparten sus jardines. Las notas del jardín (`accessNotes`) quedan para lo propio de cada jardín.
 - Un PR por bloque de pantallas.
 
+## Backend (Bernardo, 2026-11-17)
+
+- Backend: **Supabase** (Postgres, Auth por SMS y Storage). SMS: **Twilio**, configurado dentro de Supabase.
+- La app no escribe directo en las tablas: todo pasa por la función `arku`, que corre las mismas reglas de `packages/domain` en el servidor (cobertura, cédula, cotización y precios). Cada cliente solo puede leer sus filas (RLS).
+- Fotos en el bucket privado `jardines`, en la carpeta del cliente (`<uid>/archivo.jpg`). Se guarda solo la clave.
+- Sin `.env`, la app sigue en modo demostración (código SMS fijo `123456`), que es lo que usa la vista previa web.
+- "Crear cuenta" e "Ya tengo cuenta" llevan al mismo paso: el código por SMS decide si la cuenta ya existe.
+
 ## Pendientes (no decididos)
 
 - Comisión de Arku, tarifas reales y umbrales de tamaño.
 - Vigencia real de una cotización.
 - Polígonos oficiales de cobertura.
 - Límite de volumen de residuos.
-- Backend (Supabase candidato) y proveedor de SMS.
