@@ -245,3 +245,38 @@ describe('editar jardín (D02)', () => {
     await expect(service.editGarden('c2', garden.id, { name: 'Otro' })).rejects.toThrow('no encontrado');
   });
 });
+
+describe('perfil (P01)', () => {
+  const OUTSIDE = { lat: -0.18, lng: -78.48 };
+
+  it('corrige una dirección guardada: los jardines la ven, la cotización existente no cambia', async () => {
+    const { service } = makeService(new MemoryStorage());
+    const casa = await service.addAddress('c1', { label: 'Casa', line: 'Av. Interoceánica km 12', arrivalInstructions: 'Tocar timbre', coordinates: CUMBAYA });
+    const garden = await service.createGarden('c1', { name: 'Frontal', addressId: casa.id, sizeBand: 'M' });
+    const quote = await service.requestQuote('c1', garden.id);
+
+    const updated = await service.updateAddress('c1', casa.id, { label: 'Familia', line: 'Calle Francisco de Orellana 5', reference: 'Portón verde', coordinates: CUMBAYA });
+    expect(updated).toMatchObject({ id: casa.id, label: 'Familia', reference: 'Portón verde', createdAt: casa.createdAt });
+    expect(updated.arrivalInstructions).toBeUndefined();
+    expect((await service.getGarden('c1', garden.id)).address.line).toBe('Calle Francisco de Orellana 5');
+    expect((await service.getQuote('c1', quote.id)).snapshot.addressLine).toBe('Av. Interoceánica km 12');
+    expect(await service.listAddresses('c1')).toHaveLength(1);
+  });
+
+  it('no corrige una dirección hacia fuera de cobertura ni la de otro cliente', async () => {
+    const { service } = makeService(new MemoryStorage());
+    const casa = await service.addAddress('c1', { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA });
+    await expect(service.updateAddress('c1', casa.id, { label: 'Casa', line: 'Av. Amazonas 100', coordinates: OUTSIDE })).rejects.toBeInstanceOf(OutOfCoverageError);
+    await expect(service.updateAddress('c2', casa.id, { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA })).rejects.toThrow('no encontrado');
+    expect((await service.listAddresses('c1'))[0]?.line).toBe('Av. Interoceánica km 12');
+  });
+
+  it('actualiza nombre, apellido y cédula sin tocar el celular', async () => {
+    const { service } = makeService(new MemoryStorage());
+    const customer = await service.registerCustomer('0991234567', { firstName: 'Ana', lastName: 'Pérez', idNumber: '1712345675' });
+    const updated = await service.updateCustomerProfile(customer.id, { firstName: ' Ana María ', lastName: 'Pérez', idNumber: '1710034065' });
+    expect(updated).toMatchObject({ firstName: 'Ana María', idNumber: '1710034065', phone: '0991234567', createdAt: customer.createdAt });
+    await expect(service.updateCustomerProfile(customer.id, { firstName: 'Ana', lastName: 'Pérez', idNumber: '1712345674' })).rejects.toThrow();
+    expect((await service.getCustomer(customer.id))?.idNumber).toBe('1710034065');
+  });
+});
