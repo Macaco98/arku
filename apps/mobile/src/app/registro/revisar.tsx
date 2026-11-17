@@ -50,8 +50,11 @@ export default function Revisar() {
         garden: { name: draft.name, sizeBand: size, accessNotes: draft.accessNotes },
         photoKeys: photos.map((p) => p.storageKey),
       });
+      // S06 → S07/S08: el jardín ya quedó guardado; si cotizar falla, se ve en Mis jardines.
+      const quote = await service.requestQuote(customer.id, garden.id).catch(() => undefined);
       exit({ keepPhotos: true });
-      router.navigate({ pathname: '/jardines', params: { guardado: garden.name } });
+      if (quote) router.push({ pathname: '/cotizacion/[id]', params: { id: quote.id, guardado: '1' } });
+      else router.navigate({ pathname: '/jardines', params: { guardado: garden.name } });
     } catch {
       setStatus('error');
     }

@@ -123,3 +123,13 @@ export function withExpiry(quote: Quote, now: Date): Quote {
   }
   return quote;
 }
+
+/** El cliente solo puede responder a un precio vigente. */
+export function respondToQuote(quote: Quote, answer: 'accepted' | 'declined', now: Date): Quote {
+  const current = withExpiry(quote, now);
+  if (current.status === 'expired') throw new Error('Esta cotización ya no está vigente.');
+  if (current.status !== 'automatic' && current.status !== 'ready') {
+    throw new Error('Esta cotización todavía no tiene un precio para aceptar.');
+  }
+  return { ...current, status: answer, respondedAt: now.toISOString() };
+}

@@ -119,4 +119,6 @@ export interface Quote {
   price?: QuotePrice;
   createdAt: ISODate;
   expiresAt?: ISODate;
+  /** Cuándo el cliente aceptó o rechazó el precio. */
+  respondedAt?: ISODate;
 }
