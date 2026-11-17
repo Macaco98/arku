@@ -52,7 +52,7 @@ export default function Cotizacion() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const customer = useCustomer();
-  const { gardens: service } = useServices();
+  const { gardens: service, backend } = useServices();
   const { id, guardado } = useLocalSearchParams<{ id: string; guardado?: string }>();
   const [data, setData] = useState<Loaded>();
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -260,13 +260,16 @@ export default function Cotizacion() {
         {quote.status === 'pending_review' ? (
           <>
             <InfoList sections={[{ title: 'Qué pasa ahora', kind: 'number', items: PASOS }]} />
-            <StatusBanner
-              tipo="Info"
-              title="Demo: aún no existe el panel de Arku"
-              message="Simula que un especialista terminó la revisión con un precio de demostración."
-              actionLabel={busy === 'demo' ? 'Simulando…' : 'Simular revisión de Arku'}
-              onAction={simulateReview}
-            />
+            {/* Solo en modo demostración: con Supabase, la revisión la termina Arku. */}
+            {backend === 'demo' ? (
+              <StatusBanner
+                tipo="Info"
+                title="Demo: aún no existe el panel de Arku"
+                message="Simula que un especialista terminó la revisión con un precio de demostración."
+                actionLabel={busy === 'demo' ? 'Simulando…' : 'Simular revisión de Arku'}
+                onAction={simulateReview}
+              />
+            ) : null}
           </>
         ) : null}
       </ScrollView>

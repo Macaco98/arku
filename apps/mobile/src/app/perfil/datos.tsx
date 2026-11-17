@@ -24,7 +24,7 @@ export default function DatosPersonales() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const customer = useCustomer();
-  const { gardens: service, signIn } = useServices();
+  const { gardens: service, updateCustomer } = useServices();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>();
   const defaults = { firstName: customer.firstName, lastName: customer.lastName, idNumber: customer.idNumber };
@@ -46,7 +46,7 @@ export default function DatosPersonales() {
     setSaveError(undefined);
     try {
       // Actualiza también el cliente de la sesión para que Perfil muestre los datos nuevos.
-      await signIn(await service.updateCustomerProfile(customer.id, data));
+      updateCustomer(await service.updateCustomerProfile(customer.id, data));
       setFlash('Datos actualizados');
       guard.leave();
     } catch {

@@ -14,6 +14,7 @@ Lee primero `docs/ARKU_CONTEXT_MASTER.md` (fuente de verdad) y `docs/DECISIONS.m
 ## Dónde va cada cosa
 
 - Reglas de negocio puras y probadas: `packages/domain`. La app no reimplementa reglas.
+- Backend (Supabase): `packages/api` (repositorios, protocolo y función `arku`) y `supabase/` (migraciones SQL y la función compilada). Si cambias `packages/domain` o `packages/api`, vuelve a compilar la función con `pnpm --filter @arku/api build:function`.
 - Tokens visuales: `packages/ui/tokens/figma-variables.json`, exportado de las variables de Figma. No escribas colores, tamaños ni radios a mano en la app; usa `@arku/ui`.
 - Componentes de la app: `apps/mobile/src/components`, con los mismos nombres que en Figma (PrimaryButton, TextField, GardenCard…).
 - Pantallas: `apps/mobile/src/app` (Expo Router). Ver también `apps/mobile/AGENTS.md` para reglas de Expo.

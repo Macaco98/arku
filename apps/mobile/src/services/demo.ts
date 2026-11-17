@@ -1,4 +1,4 @@
-import type { GardenService } from '@arku/domain';
+import type { GardenApi } from '@arku/api';
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -7,7 +7,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * para probar las listas sin pasar por el registro. Las fotos son claves
  * ficticias, no imágenes reales.
  */
-export async function seedDemoGardens(service: GardenService, customerId: string) {
+export async function seedDemoGardens(service: GardenApi, customerId: string) {
   const casa = await service.addAddress(customerId, {
     label: 'Casa',
     line: 'Av. Interoceánica km 12',

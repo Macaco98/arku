@@ -42,7 +42,7 @@ function Row({ icon, title, subtitle, onPress, last }: { icon: IconName; title: 
 export default function Perfil() {
   const router = useRouter();
   const customer = useCustomer();
-  const { gardens: service, signOut } = useServices();
+  const { gardens: service, signOut, backend } = useServices();
   const { gardens, addresses, retry } = useGardenList();
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState<string>();
@@ -112,7 +112,7 @@ export default function Perfil() {
         </Pressable>
 
         {/* Solo en desarrollo: carga los jardines del prototipo para probar las listas. */}
-        {gardens.length === 0 ? (
+        {backend === 'demo' && gardens.length === 0 ? (
           <View style={styles.demo}>
             <StatusBanner
               tipo="Info"

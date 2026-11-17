@@ -55,10 +55,11 @@ export interface ServiceDeps {
 export class GardenService {
   constructor(private readonly deps: ServiceDeps) {}
 
-  async registerCustomer(phoneInput: string, profile: CustomerProfileInput): Promise<Customer> {
+  /** A03. Con backend, `id` es el del usuario que verificó su celular por SMS. */
+  async registerCustomer(phoneInput: string, profile: CustomerProfileInput, id?: string): Promise<Customer> {
     const phone = phoneSchema.parse(phoneInput);
     const data = customerProfileSchema.parse(profile);
-    const customer: Customer = { id: this.deps.newId(), phone, ...data, createdAt: this.deps.now().toISOString() };
+    const customer: Customer = { id: id ?? this.deps.newId(), phone, ...data, createdAt: this.deps.now().toISOString() };
     return this.deps.repos.customers.save(customer);
   }
 
@@ -112,7 +113,7 @@ export class GardenService {
   }
 
   listAddresses(customerId: string) {
-    return this.deps.repos.addresses.list((a) => a.customerId === customerId);
+    return this.deps.repos.addresses.list({ customerId });
   }
 
   /** S06: guardar nunca exige fotos, en ningún tamaño. */
@@ -158,7 +159,7 @@ export class GardenService {
 
   /** Jardines del cliente, del más reciente al más antiguo. */
   async listGardens(customerId: string) {
-    const gardens = await this.deps.repos.gardens.list((g) => g.customerId === customerId);
+    const gardens = await this.deps.repos.gardens.list({ customerId });
     return gardens.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
@@ -219,7 +220,7 @@ export class GardenService {
 
   async listQuotes(customerId: string, gardenId: string): Promise<Quote[]> {
     const now = this.deps.now();
-    const quotes = await this.deps.repos.quotes.list((q) => q.customerId === customerId && q.gardenId === gardenId);
+    const quotes = await this.deps.repos.quotes.list({ customerId, gardenId });
     return quotes.map((q) => withExpiry(q, now));
   }
 

@@ -5,9 +5,16 @@ import type { Address, Customer, Garden, Quote } from './types';
  * no de la implementación. En Sprint 01 la implementación es un MOCK de desarrollo
  * persistente; un backend real (p. ej. Supabase) la reemplazará sin tocar pantallas.
  */
+/** Filtro por igualdad de campos, p. ej. `{ customerId }`. Se traduce directo a una consulta SQL. */
+export type Where<T> = Partial<{ [K in keyof T]: T[K] extends string ? string : never }>;
+
+export function matches<T>(item: T, where: Where<T> = {}) {
+  return Object.entries(where).every(([key, value]) => (item as Record<string, unknown>)[key] === value);
+}
+
 export interface Repository<T extends { id: string }> {
   get(id: string): Promise<T | undefined>;
-  list(filter?: (item: T) => boolean): Promise<T[]>;
+  list(where?: Where<T>): Promise<T[]>;
   save(item: T): Promise<T>;
   remove(id: string): Promise<void>;
 }
@@ -59,9 +66,8 @@ export class StorageRepository<T extends { id: string }> implements Repository<T
     return (await this.readAll()).find((item) => item.id === id);
   }
 
-  async list(filter?: (item: T) => boolean) {
-    const items = await this.readAll();
-    return filter ? items.filter(filter) : items;
+  async list(where?: Where<T>) {
+    return (await this.readAll()).filter((item) => matches(item, where));
   }
 
   async save(item: T) {

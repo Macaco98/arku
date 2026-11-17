@@ -1,0 +1,22 @@
+{
+  "name": "@arku/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Conexión de Arku con Supabase: repositorios, protocolo de la función `arku` y cliente para la app.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json",
+    "build:function": "node scripts/build-function.mjs"
+  },
+  "dependencies": {
+    "@arku/domain": "workspace:*",
+    "@supabase/supabase-js": "2.118.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12"
+  }
+}
