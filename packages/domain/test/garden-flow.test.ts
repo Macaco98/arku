@@ -163,3 +163,51 @@ describe('edición de jardines', () => {
     await expect(service.requestQuote('c2', garden.id)).rejects.toThrow('no encontrado');
   });
 });
+
+describe('cotización (S07/S08)', () => {
+  const HOUR = 3_600_000;
+  async function gardenWith(size: 'M' | 'L' | 'XL', photos: string[] = []) {
+    const ctx = makeService(new MemoryStorage());
+    const garden = await ctx.service.registerGarden('c1', {
+      address: { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA },
+      garden: { name: 'Casa Cumbayá', sizeBand: size },
+      photoKeys: photos,
+    });
+    return { ...ctx, garden };
+  }
+
+  it('acepta un precio automático vigente y lo deja registrado', async () => {
+    const { service, garden } = await gardenWith('M');
+    const quote = await service.requestQuote('c1', garden.id);
+    const accepted = await service.respondToQuote('c1', quote.id, 'accepted');
+    expect(accepted.status).toBe('accepted');
+    expect(accepted.respondedAt).toBeDefined();
+    expect((await service.latestQuote('c1', garden.id))?.id).toBe(quote.id);
+  });
+
+  it('no deja aceptar una cotización en revisión ni una vencida', async () => {
+    const { service, garden, advance } = await gardenWith('XL');
+    const pending = await service.requestQuote('c1', garden.id);
+    await expect(service.respondToQuote('c1', pending.id, 'accepted')).rejects.toThrow('todavía no tiene un precio');
+    const ready = await service.completeReview(pending.id, 6000);
+    expect(ready).toMatchObject({ status: 'ready', price: { baseCents: 6000 } });
+    advance(73 * HOUR);
+    expect((await service.getQuote('c1', pending.id)).status).toBe('expired');
+    await expect(service.respondToQuote('c1', pending.id, 'accepted')).rejects.toThrow('ya no está vigente');
+  });
+
+  it('L sin fotos pasa a precio inmediato al agregar una foto y volver a cotizar', async () => {
+    const { service, garden } = await gardenWith('L');
+    expect((await service.requestQuote('c1', garden.id)).status).toBe('pending_review');
+    await service.addPhoto('c1', garden.id, 'jardines/k1.jpg');
+    const again = await service.requestQuote('c1', garden.id);
+    expect(again).toMatchObject({ status: 'automatic', price: { baseCents: 5000 } });
+    expect((await service.latestQuote('c1', garden.id))?.id).toBe(again.id);
+  });
+
+  it('no muestra cotizaciones de otro cliente', async () => {
+    const { service, garden } = await gardenWith('M');
+    const quote = await service.requestQuote('c1', garden.id);
+    await expect(service.getQuote('c2', quote.id)).rejects.toThrow('no encontrado');
+  });
+});

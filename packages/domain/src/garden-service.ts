@@ -1,5 +1,5 @@
 import type { CoverageService } from './coverage';
-import { buildQuote, withExpiry } from './quote';
+import { buildQuote, completeManualReview, respondToQuote, withExpiry } from './quote';
 import type { Repositories } from './repositories';
 import {
   addressInputSchema,
@@ -174,6 +174,40 @@ export class GardenService {
     const now = this.deps.now();
     const quotes = await this.deps.repos.quotes.list((q) => q.customerId === customerId && q.gardenId === gardenId);
     return quotes.map((q) => withExpiry(q, now));
+  }
+
+  /** S07/S08: una cotización, marcada como vencida si ya pasó su vigencia. */
+  async getQuote(customerId: string, quoteId: string): Promise<Quote> {
+    return withExpiry(await this.requireQuote(customerId, quoteId), this.deps.now());
+  }
+
+  /** La cotización más reciente de un jardín, si tiene alguna. */
+  async latestQuote(customerId: string, gardenId: string): Promise<Quote | undefined> {
+    // Al revés antes de ordenar: con la misma hora, gana la última guardada.
+    const quotes = (await this.listQuotes(customerId, gardenId)).reverse();
+    return quotes.sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  }
+
+  /** S07/S08: aceptar o rechazar un precio vigente. Aceptar no agenda ni cobra en Sprint 01. */
+  async respondToQuote(customerId: string, quoteId: string, answer: 'accepted' | 'declined'): Promise<Quote> {
+    const quote = await this.requireQuote(customerId, quoteId);
+    return this.deps.repos.quotes.save(respondToQuote(quote, answer, this.deps.now()));
+  }
+
+  /**
+   * Arku termina una revisión manual con un importe. Lo usará el panel de Arku;
+   * mientras no exista, la app lo llama con importes de demostración.
+   */
+  async completeReview(quoteId: string, reviewedTariffCents: number): Promise<Quote> {
+    const quote = await this.deps.repos.quotes.get(quoteId);
+    if (!quote) throw new NotFoundError('Cotización');
+    return this.deps.repos.quotes.save(completeManualReview(quote, reviewedTariffCents, this.deps.pricing, this.deps.now()));
+  }
+
+  private async requireQuote(customerId: string, quoteId: string) {
+    const quote = await this.deps.repos.quotes.get(quoteId);
+    if (!quote || quote.customerId !== customerId) throw new NotFoundError('Cotización');
+    return quote;
   }
 
   private async requireGarden(customerId: string, gardenId: string) {

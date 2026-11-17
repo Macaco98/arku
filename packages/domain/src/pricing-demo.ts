@@ -16,6 +16,17 @@ export const DEMO_PRICING: PricingRule = {
   ],
 };
 
+/**
+ * DEMO: importe con que se simula el fin de una revisión manual mientras no
+ * exista el panel de Arku. No es una tarifa real.
+ */
+export const DEMO_REVIEW_TARIFFS: Record<SizeBand, number> = {
+  S: 2500,
+  M: 3500,
+  L: 5000,
+  XL: 6000,
+};
+
 /** Texto orientativo por banda. Los umbrales son hipótesis configurables. */
 export const SIZE_BAND_LABELS: Record<SizeBand, string> = {
   S: 'Hasta 50 m²',
