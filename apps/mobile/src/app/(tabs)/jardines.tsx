@@ -25,7 +25,6 @@ export default function MisJardines() {
   const { guardado } = useLocalSearchParams<{ guardado?: string }>();
   const { status, gardens, locationOf, retry } = useGardenList();
   const offline = useIsOffline();
-  const soon = (pantalla: string) => router.push({ pathname: '/proximamente', params: { pantalla } });
   const sub = subtitle(status, gardens.length, offline);
 
   // El aviso de "Jardín guardado" se oculta solo después de unos segundos.
@@ -94,8 +93,8 @@ export default function MisJardines() {
         <GardenCard
           garden={item}
           location={locationOf(item)}
-          onPress={() => soon('Detalle de jardín')}
-          onEdit={() => soon('Editar jardín')}
+          onPress={() => router.push({ pathname: '/jardin/[id]', params: { id: item.id } })}
+          onEdit={() => router.push({ pathname: '/jardin/[id]/editar', params: { id: item.id } })}
         />
       )}
       ListEmptyComponent={

@@ -211,3 +211,37 @@ describe('cotización (S07/S08)', () => {
     await expect(service.getQuote('c2', quote.id)).rejects.toThrow('no encontrado');
   });
 });
+
+describe('editar jardín (D02)', () => {
+  async function setup() {
+    const ctx = makeService(new MemoryStorage());
+    const garden = await ctx.service.registerGarden('c1', {
+      address: { label: 'Casa', line: 'Av. Interoceánica km 12', coordinates: CUMBAYA },
+      garden: { name: 'Casa Cumbayá', sizeBand: 'M', accessNotes: 'Perro' },
+      photoKeys: ['a', 'b'],
+    });
+    return { ...ctx, garden };
+  }
+
+  it('guarda nombre, tamaño, notas y fotos sin tocar la cotización existente', async () => {
+    const { service, garden } = await setup();
+    const quote = await service.requestQuote('c1', garden.id);
+    const edited = await service.editGarden('c1', garden.id, {
+      name: 'Jardín frontal',
+      sizeBand: 'L',
+      accessNotes: '  Sin perro  ',
+      removePhotoIds: [garden.photos[0]!.id],
+      addPhotoKeys: ['c', 'd'],
+    });
+    expect(edited).toMatchObject({ name: 'Jardín frontal', sizeBand: 'L', accessNotes: 'Sin perro' });
+    expect(edited.photos.map((p) => p.storageKey)).toEqual(['b', 'c', 'd']);
+    const old = await service.getQuote('c1', quote.id);
+    expect(old.snapshot).toMatchObject({ gardenName: 'Casa Cumbayá', sizeBand: 'M', photoCount: 2 });
+  });
+
+  it('no pasa de 6 fotos ni edita jardines de otro cliente', async () => {
+    const { service, garden } = await setup();
+    await expect(service.editGarden('c1', garden.id, { addPhotoKeys: ['1', '2', '3', '4', '5'] })).rejects.toThrow('hasta 6 fotos');
+    await expect(service.editGarden('c2', garden.id, { name: 'Otro' })).rejects.toThrow('no encontrado');
+  });
+});

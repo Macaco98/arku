@@ -5,9 +5,9 @@ import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from 'react-native-svg'
  * Ilustración de jardín (Figma › GardenPhoto). Se usa como miniatura mientras
  * las fotos privadas no se muestran en la lista. No es una foto real del cliente.
  */
-export function GardenPhoto({ size = 72 }: { size?: number }) {
+export function GardenPhoto({ size = 72, width, height }: { size?: number; width?: number | `${number}%`; height?: number | `${number}%` }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 106 106" {...decorative}>
+    <Svg width={width ?? size} height={height ?? size} viewBox="0 0 106 106" preserveAspectRatio="xMidYMid slice" {...decorative}>
       <Defs>
         <LinearGradient id="sky" x1="53" y1="0" x2="53" y2="106" gradientUnits="userSpaceOnUse">
           <Stop stopColor="#CFE6C4" />

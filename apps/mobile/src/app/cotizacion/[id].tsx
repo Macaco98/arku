@@ -158,7 +158,6 @@ export default function Cotizacion() {
 
   const { quote, garden, location } = data;
   const s = quote.snapshot;
-  const soon = (pantalla: string) => router.push({ pathname: '/proximamente', params: { pantalla } });
 
   const footer = (() => {
     switch (quote.status) {
@@ -204,8 +203,8 @@ export default function Cotizacion() {
           <GardenCard
             garden={garden}
             location={location}
-            onPress={() => soon('Detalle de jardín')}
-            onEdit={() => soon('Editar jardín')}
+            onPress={() => router.push({ pathname: '/jardin/[id]', params: { id: garden.id } })}
+            onEdit={() => router.push({ pathname: '/jardin/[id]/editar', params: { id: garden.id } })}
           />
         ) : null}
 

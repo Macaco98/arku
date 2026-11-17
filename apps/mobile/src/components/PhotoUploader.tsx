@@ -2,11 +2,13 @@ import { color, radius, space, touchMin } from '@arku/ui';
 import { Image } from 'expo-image';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from './AppText';
+import { GardenPhoto } from './GardenPhoto';
 import { Icon } from './Icon';
 
 interface Photo {
   storageKey: string;
-  uri: string;
+  /** Sin URI (foto guardada en otro dispositivo o de ejemplo) se muestra la ilustración. */
+  uri?: string;
 }
 
 interface Props {
@@ -18,13 +20,25 @@ interface Props {
 }
 
 /** Componente PhotoUploader de Figma: cuadrícula de 3 columnas con "Agregar" y X de 44 px para quitar. */
-export function PhotoUploader({ photos, max, uploading = false, onAdd, onRemove }: Props) {
+export function PhotoUploader<T extends Photo>({
+  photos,
+  max,
+  uploading = false,
+  onAdd,
+  onRemove,
+}: Omit<Props, 'photos' | 'onRemove'> & { photos: T[]; onRemove: (photo: T) => void }) {
   const canAdd = photos.length < max;
   return (
     <View style={styles.grid}>
       {photos.map((p, i) => (
         <View key={p.storageKey} style={styles.cell}>
-          <Image source={{ uri: p.uri }} style={styles.photo} contentFit="cover" accessibilityLabel={`Foto ${i + 1} del jardín`} />
+          {p.uri ? (
+            <Image source={{ uri: p.uri }} style={styles.photo} contentFit="cover" accessibilityLabel={`Foto ${i + 1} del jardín`} />
+          ) : (
+            <View style={styles.photo}>
+              <GardenPhoto width="100%" height="100%" />
+            </View>
+          )}
           <Pressable
             onPress={() => onRemove(p)}
             accessibilityRole="button"
@@ -67,7 +81,7 @@ const GAP = space.md;
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP },
   cell: { width: `${(100 - 6) / 3}%`, aspectRatio: 1, borderRadius: radius.md, overflow: 'hidden' },
-  photo: { width: '100%', height: '100%', backgroundColor: color['bg/subtle'] },
+  photo: { width: '100%', height: '100%', backgroundColor: color['bg/subtle'], overflow: 'hidden' },
   removeTarget: {
     position: 'absolute',
     top: 0,

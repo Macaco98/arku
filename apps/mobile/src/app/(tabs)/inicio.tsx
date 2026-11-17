@@ -70,7 +70,7 @@ export default function Inicio() {
           <PrimaryButton
             tone="acento"
             label="Cotizar mi jardín"
-            onPress={() => (hasGardens ? soon('Elegir jardín') : router.push('/registro'))}
+            onPress={() => router.push(hasGardens ? '/cotizar' : '/registro')}
           />
         </View>
       </View>
@@ -117,8 +117,8 @@ export default function Inicio() {
               key={g.id}
               garden={g}
               location={locationOf(g)}
-              onPress={() => soon('Detalle de jardín')}
-              onEdit={() => soon('Editar jardín')}
+              onPress={() => router.push({ pathname: '/jardin/[id]', params: { id: g.id } })}
+              onEdit={() => router.push({ pathname: '/jardin/[id]/editar', params: { id: g.id } })}
             />
           ))}
         </View>
