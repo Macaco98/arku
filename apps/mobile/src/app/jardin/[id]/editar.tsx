@@ -1,7 +1,7 @@
 import { gardenInputSchema, MAX_ACCESS_NOTES, MAX_PHOTOS_PER_GARDEN, SIZE_BAND_LABELS, SIZE_BANDS, determineQuoteRoute, type Address, type Garden, type SizeBand } from '@arku/domain';
 import { color, radius, space, touchMin } from '@arku/ui';
-import { useLocalSearchParams, useNavigation, usePreventRemove, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AddressOption } from '../../../components/AddressOption';
@@ -18,6 +18,7 @@ import { TextField } from '../../../components/TextField';
 import { useCustomer, useServices } from '../../../services';
 import { setFlash } from '../../../services/flash';
 import { discardPhoto, photoUri, pickGardenPhotos } from '../../../services/photos';
+import { useLeaveGuard } from '../../../services/useLeaveGuard';
 
 interface EditPhoto {
   /** id de la foto ya guardada; las nuevas no tienen. */
@@ -57,7 +58,6 @@ function sameForm(a: Form, b: Form) {
 /** D02 · Editar jardín, con D03 descartar cambios y D04 guardando. */
 export default function EditarJardin() {
   const router = useRouter();
-  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const customer = useCustomer();
   const { gardens: service } = useServices();
@@ -70,9 +70,6 @@ export default function EditarJardin() {
   const [saveError, setSaveError] = useState<string>();
   const [uploading, setUploading] = useState(false);
   const [photoProblem, setPhotoProblem] = useState<string>();
-  const [asking, setAsking] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const repeat = useRef<() => void>(undefined);
 
   const load = useCallback(async () => {
     try {
@@ -92,22 +89,7 @@ export default function EditarJardin() {
 
   const dirty = !!form && !!original && !sameForm(form, original);
 
-  // D03: volver con cambios sin guardar pregunta antes de salir.
-  usePreventRemove(dirty && !leaving, ({ repeat: again }) => {
-    repeat.current = again;
-    setAsking(true);
-  });
-
-  useEffect(() => {
-    if (leaving && repeat.current) {
-      const again = repeat.current;
-      repeat.current = undefined;
-      again();
-    } else if (leaving) {
-      if (navigation.canGoBack()) navigation.goBack();
-      else router.replace({ pathname: '/jardin/[id]', params: { id } });
-    }
-  }, [leaving, navigation, router, id]);
+  const guard = useLeaveGuard(dirty, () => router.replace({ pathname: '/jardin/[id]', params: { id } }));
 
   const discardNewPhotos = () => {
     if (!form || !original) return;
@@ -163,7 +145,7 @@ export default function EditarJardin() {
       });
       original.photos.filter((p) => p.id && !keptIds.has(p.id)).forEach((p) => discardPhoto(p.storageKey));
       setFlash('Cambios guardados');
-      setLeaving(true);
+      guard.leave();
     } catch (e) {
       setSaveError(e instanceof Error && e.message ? e.message : 'Inténtalo de nuevo.');
       setSaving(false);
@@ -268,22 +250,18 @@ export default function EditarJardin() {
           loading={saving}
           disabled={!dirty || !name.success || notesTooLong || uploading}
         />
-        <SecondaryButton tipo="Texto" label="Cancelar" onPress={() => (dirty ? setAsking(true) : setLeaving(true))} />
+        <SecondaryButton tipo="Texto" label="Cancelar" onPress={guard.cancel} />
       </View>
       <ConfirmDialog
-        visible={asking}
+        visible={guard.asking}
         title="¿Descartar los cambios?"
         message="Si sales ahora, perderás lo que editaste en este jardín."
         confirmLabel="Seguir editando"
-        onConfirm={() => {
-          repeat.current = undefined;
-          setAsking(false);
-        }}
+        onConfirm={guard.keepEditing}
         destructiveLabel="Descartar cambios"
         onDestructive={() => {
-          setAsking(false);
           discardNewPhotos();
-          setLeaving(true);
+          guard.discard();
         }}
       />
     </KeyboardAvoidingView>

@@ -1,12 +1,14 @@
 import { color, radius, space, touchMin } from '@arku/ui';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { Icon, type IconName } from '../../components/Icon';
 import { StatusBanner } from '../../components/StatusBanner';
+import { Toast } from '../../components/Toast';
 import { initialsOf, useCustomer, useServices } from '../../services';
 import { seedDemoGardens } from '../../services/demo';
+import { takeFlash } from '../../services/flash';
 import { useGardenList } from '../../services/useGardenList';
 
 const formatPhone = (p: string) => `${p.slice(0, 3)} ${p.slice(3, 6)} ${p.slice(6)}`;
@@ -43,6 +45,20 @@ export default function Perfil() {
   const { gardens: service, signOut } = useServices();
   const { gardens, addresses, retry } = useGardenList();
   const [seeding, setSeeding] = useState(false);
+  const [toast, setToast] = useState<string>();
+
+  useFocusEffect(
+    useCallback(() => {
+      const flash = takeFlash();
+      if (flash) setToast(flash);
+    }, []),
+  );
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(undefined), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
   const soon = (pantalla: string) => router.push({ pathname: '/proximamente', params: { pantalla } });
 
   const seed = async () => {
@@ -56,57 +72,60 @@ export default function Perfil() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.identity}>
-        <View style={styles.avatar}>
-          <AppText variant="Title/20" tone="primary">
-            {initialsOf(customer)}
-          </AppText>
+    <View style={styles.flex}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.identity}>
+          <View style={styles.avatar}>
+            <AppText variant="Title/20" tone="primary">
+              {initialsOf(customer)}
+            </AppText>
+          </View>
+          <View style={styles.flex}>
+            <AppText variant="Title/20" tone="primary">
+              {customer.firstName} {customer.lastName}
+            </AppText>
+            <AppText variant="Caption/12" tone="secondary">
+              {formatPhone(customer.phone)} · Cédula {maskId(customer.idNumber)}
+            </AppText>
+          </View>
         </View>
-        <View style={styles.flex}>
-          <AppText variant="Title/20" tone="primary">
-            {customer.firstName} {customer.lastName}
-          </AppText>
-          <AppText variant="Caption/12" tone="secondary">
-            {formatPhone(customer.phone)} · Cédula {maskId(customer.idNumber)}
-          </AppText>
+
+        <View style={styles.card}>
+          <Row icon="user" title="Datos personales" subtitle="Nombre, apellido y cédula" onPress={() => router.push('/perfil/datos')} />
+          <Row icon="pin" title="Mis direcciones" subtitle={plural(addresses.length, 'dirección guardada', 'direcciones guardadas')} onPress={() => router.push('/perfil/direcciones')} />
+          <Row icon="leaf" title="Mis jardines" subtitle={plural(gardens.length, 'jardín', 'jardines')} onPress={() => router.navigate('/jardines')} />
+          <Row icon="info" title="Ayuda y soporte" onPress={() => soon('Ayuda y soporte')} />
+          <Row icon="shield" title="Términos y privacidad" onPress={() => soon('Términos y privacidad')} last />
         </View>
-      </View>
 
-      <View style={styles.card}>
-        <Row icon="user" title="Datos personales" subtitle="Nombre, apellido y cédula" onPress={() => soon('Datos personales')} />
-        <Row icon="pin" title="Mis direcciones" subtitle={plural(addresses.length, 'dirección guardada', 'direcciones guardadas')} onPress={() => soon('Mis direcciones')} />
-        <Row icon="leaf" title="Mis jardines" subtitle={plural(gardens.length, 'jardín', 'jardines')} onPress={() => router.navigate('/jardines')} />
-        <Row icon="info" title="Ayuda y soporte" onPress={() => soon('Ayuda y soporte')} />
-        <Row icon="shield" title="Términos y privacidad" onPress={() => soon('Términos y privacidad')} last />
-      </View>
+        <Pressable
+          onPress={async () => {
+            await signOut();
+            router.replace('/');
+          }}
+          accessibilityRole="button"
+          style={styles.signOut}
+        >
+          <AppText variant="Label/14" tone="brand">
+            Cerrar sesión
+          </AppText>
+        </Pressable>
 
-      <Pressable
-        onPress={async () => {
-          await signOut();
-          router.replace('/');
-        }}
-        accessibilityRole="button"
-        style={styles.signOut}
-      >
-        <AppText variant="Label/14" tone="brand">
-          Cerrar sesión
-        </AppText>
-      </Pressable>
-
-      {/* Solo en desarrollo: carga los jardines del prototipo para probar las listas. */}
-      {gardens.length === 0 ? (
-        <View style={styles.demo}>
-          <StatusBanner
-            tipo="Info"
-            title="Modo demostración"
-            message="Carga jardines de ejemplo para probar Inicio y Mis jardines."
-            actionLabel={seeding ? 'Cargando…' : 'Cargar jardines de ejemplo'}
-            onAction={seeding ? undefined : seed}
-          />
-        </View>
-      ) : null}
-    </ScrollView>
+        {/* Solo en desarrollo: carga los jardines del prototipo para probar las listas. */}
+        {gardens.length === 0 ? (
+          <View style={styles.demo}>
+            <StatusBanner
+              tipo="Info"
+              title="Modo demostración"
+              message="Carga jardines de ejemplo para probar Inicio y Mis jardines."
+              actionLabel={seeding ? 'Cargando…' : 'Cargar jardines de ejemplo'}
+              onAction={seeding ? undefined : seed}
+            />
+          </View>
+        ) : null}
+      </ScrollView>
+      {toast ? <Toast icon="check" message={toast} /> : null}
+    </View>
   );
 }
 

@@ -62,6 +62,14 @@ export class GardenService {
     return this.deps.repos.customers.save(customer);
   }
 
+  /** P01 · Datos personales: nombre, apellido y cédula. El celular no cambia aquí (se verifica por SMS). */
+  async updateCustomerProfile(customerId: string, profile: CustomerProfileInput): Promise<Customer> {
+    const customer = await this.deps.repos.customers.get(customerId);
+    if (!customer) throw new NotFoundError('Cliente');
+    const data = customerProfileSchema.parse(profile);
+    return this.deps.repos.customers.save({ ...customer, ...data });
+  }
+
   getCustomer(customerId: string) {
     return this.deps.repos.customers.get(customerId);
   }
@@ -73,21 +81,34 @@ export class GardenService {
 
   /** S03: la dirección solo se guarda si cae en una zona de cobertura. */
   async addAddress(customerId: string, input: AddressInput): Promise<Address> {
+    const fields = await this.coveredAddress(input);
+    const address: Address = { id: this.deps.newId(), customerId, ...fields, createdAt: this.deps.now().toISOString() };
+    return this.deps.repos.addresses.save(address);
+  }
+
+  /**
+   * P01 · Mis direcciones: corregir una dirección guardada. Vuelve a validar la cobertura.
+   * Los jardines que la usan toman los datos nuevos; las cotizaciones existentes no cambian (copia congelada).
+   */
+  async updateAddress(customerId: string, addressId: string, input: AddressInput): Promise<Address> {
+    const current = await this.requireAddress(customerId, addressId);
+    const fields = await this.coveredAddress(input);
+    return this.deps.repos.addresses.save({ id: current.id, customerId, ...fields, createdAt: current.createdAt });
+  }
+
+  /** Valida la dirección y su cobertura. Los opcionales vacíos no se guardan. */
+  private async coveredAddress(input: AddressInput): Promise<Omit<Address, 'id' | 'customerId' | 'createdAt'>> {
     const data = addressInputSchema.parse(input);
     const coverage = await this.deps.coverage.check(data.coordinates);
     if (!coverage.covered) throw new OutOfCoverageError();
-    const address: Address = {
-      id: this.deps.newId(),
-      customerId,
+    return {
       label: data.label as AddressLabel,
       line: data.line,
       ...(data.reference ? { reference: data.reference } : {}),
       ...(data.arrivalInstructions ? { arrivalInstructions: data.arrivalInstructions } : {}),
       coordinates: data.coordinates,
       coverageZoneId: coverage.zone.id,
-      createdAt: this.deps.now().toISOString(),
     };
-    return this.deps.repos.addresses.save(address);
   }
 
   listAddresses(customerId: string) {

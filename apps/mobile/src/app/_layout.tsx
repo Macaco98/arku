@@ -43,6 +43,9 @@ export default function RootLayout() {
           <Stack.Screen name="jardin/[id]/editar" options={{ title: 'Editar jardín' }} />
           <Stack.Screen name="cotizar/index" options={{ title: 'Cotizar jardinería' }} />
           <Stack.Screen name="cotizar/[id]" options={{ title: 'Jardín' }} />
+          <Stack.Screen name="perfil/datos" options={{ title: 'Datos personales' }} />
+          <Stack.Screen name="perfil/direcciones" options={{ title: 'Mis direcciones' }} />
+          <Stack.Screen name="perfil/direccion" options={{ title: 'Dirección' }} />
           <Stack.Screen name="proximamente" options={{ title: 'Próximamente', presentation: 'modal' }} />
         </Stack>
       </ServicesProvider>
