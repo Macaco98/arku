@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Directory, File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
@@ -113,4 +114,37 @@ export function discardPhoto(storageKey: string) {
   } catch {
     // Si no se puede borrar, queda huérfana en la carpeta privada; no afecta al cliente.
   }
+}
+
+/** URLs firmadas ya pedidas en esta sesión. Duran una hora y nunca se guardan. */
+const signed = new Map<string, { url: string; expires: number }>();
+const SIGNED_SECONDS = 3600;
+
+async function signedUri(storageKey: string) {
+  const cached = signed.get(storageKey);
+  if (cached && cached.expires > Date.now() + 60_000) return cached.url;
+  if (!supabase) return undefined;
+  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(storageKey, SIGNED_SECONDS);
+  if (error || !data) return undefined;
+  signed.set(storageKey, { url: data.signedUrl, expires: Date.now() + SIGNED_SECONDS * 1000 });
+  return data.signedUrl;
+}
+
+/**
+ * URI para mostrar una foto privada: la copia del teléfono si existe; si no (p. ej. se
+ * subió desde otro teléfono), un enlace temporal firmado del bucket privado.
+ */
+export function usePhotoUri(storageKey: string | undefined, localUri?: string): string | undefined {
+  const local = localUri ?? (storageKey ? photoUri(storageKey) : undefined);
+  const [remote, setRemote] = useState<string>();
+  useEffect(() => {
+    setRemote(undefined);
+    if (local || !storageKey || !supabase) return;
+    let alive = true;
+    signedUri(storageKey).then((url) => alive && setRemote(url));
+    return () => {
+      alive = false;
+    };
+  }, [storageKey, local]);
+  return local ?? remote;
 }

@@ -18,7 +18,7 @@ import { SIZE_NAMES } from '../../../components/SizeOption';
 import { Toast } from '../../../components/Toast';
 import { useCustomer, useServices } from '../../../services';
 import { takeFlash } from '../../../services/flash';
-import { photoUri } from '../../../services/photos';
+import { usePhotoUri } from '../../../services/photos';
 import { describeAddress } from '../../../services/useGardenList';
 
 interface Loaded {
@@ -54,6 +54,7 @@ export default function DetalleJardin() {
   const [data, setData] = useState<Loaded>();
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [toast, setToast] = useState<string>();
+  const cover = usePhotoUri(data?.garden.photos[0]?.storageKey);
 
   const load = useCallback(async () => {
     try {
@@ -125,7 +126,6 @@ export default function DetalleJardin() {
   }
 
   const { garden, address, quote } = data;
-  const cover = garden.photos[0] ? photoUri(garden.photos[0].storageKey) : undefined;
   const automatic = determineQuoteRoute(garden.sizeBand, garden.photos.length) === 'automatic';
 
   return (

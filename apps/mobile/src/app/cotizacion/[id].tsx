@@ -19,22 +19,9 @@ import { StatusBanner } from '../../components/StatusBanner';
 import { useCustomer, useServices } from '../../services';
 import { pickGardenPhotos } from '../../services/photos';
 import { describeAddress } from '../../services/useGardenList';
+import { INCLUYE, NO_INCLUYE } from '../../services/alcance';
 
 /** Alcance propuesto en Figma. Pendiente de validar con jardineros. */
-const INCLUYE = [
-  'Corte de césped, si tu jardín lo tiene',
-  'Poda ligera de arbustos y plantas',
-  'Deshierbe superficial',
-  'Limpieza del área trabajada',
-  'El jardinero se lleva los residuos vegetales',
-  'Herramientas y materiales de uso común',
-];
-const NO_INCLUYE = [
-  'Tala o poda en altura',
-  'Paisajismo o instalación de riego',
-  'Fumigación o fertilizantes especiales',
-  'Compra de plantas o uso de maquinaria especializada',
-];
 const PASOS = [
   'Un especialista revisa los datos de tu jardín.',
   'La verás en Mis jardines cuando esté lista.',

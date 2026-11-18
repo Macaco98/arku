@@ -1,13 +1,14 @@
 import { color, radius, space, touchMin } from '@arku/ui';
 import { Image } from 'expo-image';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { usePhotoUri } from '../services/photos';
 import { AppText } from './AppText';
 import { GardenPhoto } from './GardenPhoto';
 import { Icon } from './Icon';
 
 interface Photo {
   storageKey: string;
-  /** Sin URI (foto guardada en otro dispositivo o de ejemplo) se muestra la ilustración. */
+  /** Sin URI se busca la copia del teléfono o un enlace firmado; sin foto disponible, la ilustración. */
   uri?: string;
 }
 
@@ -17,6 +18,17 @@ interface Props {
   uploading?: boolean;
   onAdd: () => void;
   onRemove: (photo: Photo) => void;
+}
+
+function Thumb({ photo, index }: { photo: Photo; index: number }) {
+  const uri = usePhotoUri(photo.storageKey, photo.uri);
+  return uri ? (
+    <Image source={{ uri }} style={styles.photo} contentFit="cover" accessibilityLabel={`Foto ${index + 1} del jardín`} />
+  ) : (
+    <View style={styles.photo}>
+      <GardenPhoto width="100%" height="100%" />
+    </View>
+  );
 }
 
 /** Componente PhotoUploader de Figma: cuadrícula de 3 columnas con "Agregar" y X de 44 px para quitar. */
@@ -32,13 +44,7 @@ export function PhotoUploader<T extends Photo>({
     <View style={styles.grid}>
       {photos.map((p, i) => (
         <View key={p.storageKey} style={styles.cell}>
-          {p.uri ? (
-            <Image source={{ uri: p.uri }} style={styles.photo} contentFit="cover" accessibilityLabel={`Foto ${i + 1} del jardín`} />
-          ) : (
-            <View style={styles.photo}>
-              <GardenPhoto width="100%" height="100%" />
-            </View>
-          )}
+          <Thumb photo={p} index={i} />
           <Pressable
             onPress={() => onRemove(p)}
             accessibilityRole="button"
